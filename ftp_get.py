@@ -1,24 +1,14 @@
-from urllib import urlretrieve
+import pandas as pd
+#Get from ftp site
+from ftplib import FTP
+ftp = FTP('sprucedata.ornl.gov') 
+ftp.login('ftp_public','spruce_s1')
+#load into pandas dataframe
+columnnames = ["TIMESTAMP","RECORD","AirTC_2M_Avg","RH_2M_Avg","AirTCHumm_Avg","RH_Humm_Avg","BP_kPa_Avg","Rain_mm_Tot","WS_ms_S_WVT","WindDir_D1_WVT","WindDir_SD1_WVT","WSDiag_Tot","SmplsF_Tot","Axis1Failed_Tot","Axis2Failed_Tot","BothAxisFailed_Tot","NVMerror_Tot","ROMerror_Tot","MaxGain_Tot","NNDF_Tot","HollowSurf_Avg","Hollow5cm_Avg","Hollow20cm_Avg","Hollow40cm_Avg","Hollow80cm_Avg","Hollow160cm_Avg","Hollow200cm_Avg","HummockSurf_Avg","Hummock5cm_Avg","Hummock20cm_Avg","Hummock40cm_Avg","Hummock80cm_Avg","Hummock160cm_Avg","Hummock200cm_Avg","PAR_2_M_Avg","PAR_NTree1_Avg","PAR_NTree2_Avg","PAR_SouthofHollow1_Avg","PAR_SouthofHollow2_Avg","PAR_NorthofHollow1_Avg","PAR_NorthofHollow2_Avg","PAR_Srub1_Avg","PAR_Srub2_Avg","PAR_Srub3_Avg","PAR_Srub4_Avg","TopofHummock_Avg","MidofHummock_Avg","Surface1_Avg","Surface2_Avg","D1-20cm_Avg","D2-20cm_Avg","TopH_Avg","MidH_Avg","S1_Avg","S2_Avg","Deep-20cm_Avg","short_up_Avg","short_dn_Avg","long_up_Avg","long_dn_Avg","CNR4_Temp_C_Avg","CNR4_Temp_K_Avg","long_up_corr_Avg","long_dn_corr_Avg","Rs_net_Avg","Rl_net_Avg","albedo_Avg","Rn_Avg","SPN1_Total_Avg","SPN1_Diffuse_Avg","Water_Height_Avg","Water_Temp_Avg","Watertable","Dewpoint","Dewpoint_Diff"]
+data=pd.read_csv('my.csv',skiprows=4)
+data.columns = columnnames
+#Trim columns
+teco_spruce =data[['TIMESTAMP','RECORD','AirTC_2M_Avg']]
 
-url = "ftp://ftp_public:spruce_s1@sprucedata.ornl.gov/DataFiles/EM1_Table1.dat"
-
-import urllib
-#link to a url
-response=urllib.urlretrieve(url, 'file')
-
-
-#read from the url
-#dat_read=response.read()
-#convert the data(which can be of any format) into string
-dat_str=str(response)
-print dat_str
-#breaking the string into different lines
-lines=dat_str.split("\\n")
-#save the data in a file(locally)
-local_file=r'em1_table.dat'
-#open the file
-fx=open(local_file,"w")
-#start writing in the fileusing a loop
-for line in lines:
-    fx.write(line + "\n")
-    fx.close()
+#Write to tab delimited file
+teco_spruce.to_csv('teco_spruce.txt','\t')
