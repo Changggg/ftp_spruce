@@ -58,7 +58,7 @@ month=time.str.split('-').str.get(1)
 #getting the Day and hour
 day_hour=time.str.split('-').str.get(2)
 #day_hour
-day=day_hour.str.split(' ').str.get(0)
+doy=day_hour.str.split(' ').str.get(0)
 hour=day_hour.str.split(' ').str.get(1)
 #getting the day number from the year,month and day
 #day=cal_day_num(year,month,day)
@@ -69,17 +69,17 @@ hour=hour.str.rstrip('1234567890')
 hour=hour.str.rstrip(':')
 #adding it to the existing data frame
 df['year']=year
-df['day']=day
+df['doy']=doy
 df['hour']=hour
 df['month']=month
 i=0
-
-for i in range(6337):
-    day=df.iloc[i]['day']
+length=len(df.index)
+for i in range(length):
+    doy=df.iloc[i]['doy']
     #print('hello')
     #print('day->'+str(day))
     #print('hi')
-    day=int(day)
+    doy=int(doy)
     month=df.iloc[i]['month']
     
     month=int(month)
@@ -87,20 +87,57 @@ for i in range(6337):
     year=df.iloc[i]['year']
     year=int(year)
     #print('year->'+str(year))
-    day_cal=cal_day_num(year,month,day)
-    print('day_cal->'+str(day_cal))
+    doy_cal=cal_day_num(year,month,doy)
+    #print('day_cal->'+str(day_cal))
     #setting each day to day of year
-    df.loc[i,('day')]=day_cal
+    df.loc[i,('doy')]=doy_cal
     #df.set_value('day',i,day_cal)
     i=i+1
     #print('i->'+str(i))
     #df.iloc[i]['day']=day_cal 
-teco_spruce=df[['year','month','day','hour','Tair','Tsoil','RH','VPD','Rain','WS','PAR']]
+teco_spruce=df[['year','doy','hour','Tair','Tsoil','RH','VPD','Rain','WS','PAR']]
 #teco_spruce=pd.DataFrame(teco_spruce)
-#getting the day number from the year,month and day
+#getting the mean of 'Tair','Tsoil','RH','VPD','WS','PAR' n sum of ,'Rain' by combining half n full hour(e.i.12 & 12:30)
+group_treat=teco_spruce.groupby(['year','doy','hour'])
+tair=group_treat['Tair'].mean()
+tsoil=group_treat['Tsoil'].mean()
+rh=group_treat['RH'].mean()
+vpd=group_treat['VPD'].mean()
+rain=group_treat['Rain'].sum()
+ws=group_treat['WS'].mean()
+par=group_treat['PAR'].mean()
+#Taking only the even coulums(as half hourly details not required) i.e. 12:30 not required only 12 required 
+#teco_spruce1=teco_spruce.iloc[::2]
+teco_spruce1=teco_spruce.iloc[::2]
+#need to reset the index number[from 0 2 4 8] [to 0 1 2 3]
+teco_spruce1=teco_spruce1.reset_index(drop=True)
+i=0
+length1=len(teco_spruce1.index)
+#setting the mean of 'Tair','Tsoil','RH','VPD','WS','PAR' n sum of ,'Rain' to this new dataframe teco_spruce1
+
+for i in range(length1):
+    teco_spruce1.loc[i,('Tair')]=tair.iloc[i]
+    teco_spruce1.loc[i,('Tsoil')]=tsoil.iloc[i]
+    teco_spruce1.loc[i,('RH')]=rh.iloc[i]
+    teco_spruce1.loc[i,('VPD')]=vpd.iloc[i]
+    teco_spruce1.loc[i,('Rain')]=rain.iloc[i]
+    teco_spruce1.loc[i,('WS')]=ws.iloc[i]
+    teco_spruce1.loc[i,('PAR')]=par.iloc[i]
+   
+
 #Write to tab delimited file
-teco_spruce.to_csv('teco_spruce.txt','\t')
+teco_spruce1.to_csv('teco_spruce.txt','\t',index=False)
+# joining the new file with the earlier file
 
+#file which contain earlier data(2011-2015)
+j1=pd.read_csv('join_try.txt','\t')
 
+#file which contain the new data
+j2=pd.read_csv('teco_spruce.txt','\t')
 
+#joining both the files together and removing the duplicate rows
+j3=pd.concat([j1,j2]).drop_duplicates().reset_index(drop=True)
+
+#writing it to a file
+j3.to_csv('final.txt','\t',index=False)
 
