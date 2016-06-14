@@ -1,11 +1,10 @@
 FTP SPRUCE
 ===========
 
-Please clone repo and copy config_example.py to config.py.
-
 ### Setup
 
-In config add the username and password of ftp site!!!!
+copy config_example.py to config.py.
+In config.py add the username and password of ftp site!!!!
 
 Download join_try.txt from [http://ecolab.cybercommons.org/spruce_data/join_try.txt](http://ecolab.cybercommons.org/spruce_data/join_try.txt)
 
